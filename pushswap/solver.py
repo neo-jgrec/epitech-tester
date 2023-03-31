@@ -1,61 +1,119 @@
 import sys
+from typing import Callable, Dict, List, Any
+from collections import deque
+from functools import partial
 
-def check_if_list_is_sorted(numbers, instructions):
-    l_a = numbers[:]
-    l_b = []
+class BaseInterpreter:
+    instructions: Dict[str, Callable[['BaseInterpreter'], None]] = {}
 
-    def swap(lst, i, j):
+    def __init__(self, numbers: List[int]):
+        self.la: deque = deque(numbers)
+        self.lb: deque = deque()
+
+    @staticmethod
+    def register(symbol):
+        def wrapped(func):
+            BaseInterpreter.instructions[symbol] = func
+            return func
+        return wrapped
+
+class Interpreter(BaseInterpreter):
+
+    @staticmethod
+    def register(symbol):
+        def wrapped(func):
+            Interpreter.instructions[symbol] = func
+            return func
+        return wrapped
+
+    def execute_instruction(self, symbol: str):
+        if symbol in Interpreter.instructions:
+            Interpreter.instructions[symbol](self)
+        else:
+            raise ValueError(f"Unknown instruction: {symbol}")
+
+    @staticmethod
+    def _swap(lst: deque, i: int, j: int) -> None:
         lst[i], lst[j] = lst[j], lst[i]
 
-    def pa():
-        if l_b:
-            l_a.insert(0, l_b.pop(0))
+    @BaseInterpreter.register("sa")
+    def swap_la(self):
+        if len(self.la) > 1:
+            self._swap(self.la, 0, 1)
 
-    def pb():
-        if l_a:
-            l_b.insert(0, l_a.pop(0))
+    @BaseInterpreter.register("sb")
+    def swap_lb(self):
+        if len(self.lb) > 1:
+            self._swap(self.lb, 0, 1)
 
-    def ra():
-        if l_a:
-            l_a.append(l_a.pop(0))
+    @BaseInterpreter.register("sc")
+    def swap_both(self):
+        self.swap_la()
+        self.swap_lb()
 
-    def rb():
-        if l_b:
-            l_b.append(l_b.pop(0))
+    @BaseInterpreter.register("pa")
+    def push_la(self):
+        if self.lb:
+            self.la.appendleft(self.lb.popleft())
 
-    def rra():
-        if l_a:
-            l_a.insert(0, l_a.pop())
+    @BaseInterpreter.register("pb")
+    def push_lb(self):
+        if self.la:
+            self.lb.appendleft(self.la.popleft())
 
-    def rrb():
-        if l_b:
-            l_b.insert(0, l_b.pop())
+    @BaseInterpreter.register("ra")
+    def rotate_la(self):
+        if self.la:
+            self.la.rotate(-1)
 
-    operation_mapping = {
-        'sa': lambda: swap(l_a, 0, 1),
-        'sb': lambda: swap(l_b, 0, 1),
-        'sc': lambda: (swap(l_a, 0, 1), swap(l_b, 0, 1)),
-        'pa': pa,
-        'pb': pb,
-        'ra': ra,
-        'rb': rb,
-        'rr': lambda: (ra(), rb()),
-        'rra': rra,
-        'rrb': rrb,
-        'rrr': lambda: (rra(), rrb()),
-    }
+    @BaseInterpreter.register("rb")
+    def rotate_lb(self):
+        if self.lb:
+            self.lb.rotate(-1)
+
+    @BaseInterpreter.register("rr")
+    def rotate_both(self):
+        self.rotate_la()
+        self.rotate_lb()
+
+    @BaseInterpreter.register("rra")
+    def reverse_rotate_la(self):
+        if self.la:
+            self.la.rotate(1)
+
+    @BaseInterpreter.register("rrb")
+    def reverse_rotate_lb(self):
+        if self.lb:
+            self.lb.rotate(1)
+
+    @BaseInterpreter.register("rrr")
+    def reverse_rotate_both(self):
+        self.reverse_rotate_la()
+        self.reverse_rotate_lb()
+
+    def is_sorted(self):
+        return list(self.la) == sorted(self.la) and not self.lb
+
+def main(numbers_file: str, instructions_file: str):
+    with open(numbers_file, 'r') as f:
+        numbers = list(map(int, f.read().strip().split()))
+
+    with open(instructions_file, 'r') as f:
+        instructions = f.read().strip().split()
+
+    interpreter = Interpreter(numbers)
 
     for instruction in instructions:
-        operation = operation_mapping.get(instruction)
-        if operation:
-            operation()
+        interpreter.execute_instruction(instruction)
 
-    return 1 if l_a == sorted(l_a) and not l_b else 0
+    if interpreter.is_sorted():
+        print(1)
+    else:
+        print(0)
 
 if __name__ == "__main__":
-    with open(sys.argv[1], 'r') as input_file:
-        numbers = list(map(int, input_file.readline().strip().split()))
-        instructions = input_file.readline().strip().split()
+    if len(sys.argv) != 3:
+        print(f"Usage: {sys.argv[0]} numbers_file instructions_file")
+        sys.exit(1)
 
-    result = check_if_list_is_sorted(numbers, instructions)
-    print(result)
+    main(sys.argv[1], sys.argv[2])

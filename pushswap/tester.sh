@@ -38,6 +38,8 @@ if [ ! -f "solver.py" ]; then
     exit 1
 fi
 
+echo -e "\e[33mDISCLAIMER:\e[0m This python script use to check if the instructions are valid may be slow. Be patient."
+
 for file in files/*; do
     file_name="$(basename $file)"
 
@@ -48,20 +50,18 @@ for file in files/*; do
     if [ ${exec_time:0:1} = "." ]; then exec_time="0$exec_time"
     fi
 
-    numbers=$(cat $file) > /tmp/input
-    instructions=$(cat /tmp/pushswap_output) >> /tmp/input
-    start_time_py=$(date +%s+%N)
-    result=$(python3 solver.py /tmp/input)
-    end_time_py=$(date +%s+%N)
-    exec_time_py=$(echo "scale=3; ($end_time_py - $start_time_py) / 1000000000" | bc)
-    if [ ${exec_time_py:0:1} = "." ]; then exec_time_py="0$exec_time_py"
-    fi
-    rm /tmp/input
+    numbers=$(cat $file)
+    echo $numbers > /tmp/numbers
+    instructions=$(cat /tmp/pushswap_output)
+    echo $instructions > /tmp/instructions
+
+    result=$(python3 solver.py /tmp/numbers /tmp/instructions)
+    rm /tmp/numbers /tmp/instructions
 
     if [ "$result" = "1" ]; then
-        echo -e "$file_name: \e[32mOK\e[0m ($(echo $exec_time)s, checker: $(echo $exec_time_py)s)"
+        echo -e "$file_name: \e[32mOK\e[0m ($(echo $exec_time)s)"
     else
-        echo -e "$file_name: \e[31mKO\e[0m ($(echo $exec_time)s, checker: $(echo $exec_time_py)s)"
+        echo -e "$file_name: \e[31mKO\e[0m ($(echo $exec_time)s)"
     fi
 done
 
