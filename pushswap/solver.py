@@ -13,83 +13,87 @@ class BaseInterpreter:
     @staticmethod
     def register(symbol):
         def wrapped(func):
-            BaseInterpreter.instructions[symbol] = func
+            BaseInterpreter.instructions[symbol] = partial(func, interpreter=None)
             return func
         return wrapped
-
-class Interpreter(BaseInterpreter):
-
-    @staticmethod
-    def register(symbol):
-        def wrapped(func):
-            Interpreter.instructions[symbol] = func
-            return func
-        return wrapped
-
-    def execute_instruction(self, symbol: str):
-        if symbol in Interpreter.instructions:
-            Interpreter.instructions[symbol](self)
-        else:
-            raise ValueError(f"Unknown instruction: {symbol}")
 
     @staticmethod
     def _swap(lst: deque, i: int, j: int) -> None:
         lst[i], lst[j] = lst[j], lst[i]
 
+class Interpreter(BaseInterpreter):
+
+    def execute_instruction(self, symbol: str):
+        if symbol in Interpreter.instructions:
+            Interpreter.instructions[symbol](interpreter=self)
+        else:
+            raise ValueError(f"Unknown instruction: {symbol}")
+
+    @staticmethod
     @BaseInterpreter.register("sa")
-    def swap_la(self):
-        if len(self.la) > 1:
-            self._swap(self.la, 0, 1)
+    def swap_la(interpreter=None):
+        if len(interpreter.la) > 1:
+            Interpreter._swap(interpreter.la, 0, 1)
 
+    @staticmethod
     @BaseInterpreter.register("sb")
-    def swap_lb(self):
-        if len(self.lb) > 1:
-            self._swap(self.lb, 0, 1)
+    def swap_lb(interpreter=None):
+        if len(interpreter.lb) > 1:
+            Interpreter._swap(interpreter.lb, 0, 1)
 
+    @staticmethod
     @BaseInterpreter.register("sc")
-    def swap_both(self):
-        self.swap_la()
-        self.swap_lb()
+    def swap_both(interpreter=None):
+        Interpreter.swap_la(interpreter=interpreter)
+        Interpreter.swap_lb(interpreter=interpreter)
 
+    @staticmethod
     @BaseInterpreter.register("pa")
-    def push_la(self):
-        if self.lb:
-            self.la.appendleft(self.lb.popleft())
+    def push_la(interpreter=None):
+        if interpreter.lb:
+            interpreter.la.appendleft(interpreter.lb.popleft())
 
+    @staticmethod
     @BaseInterpreter.register("pb")
-    def push_lb(self):
-        if self.la:
-            self.lb.appendleft(self.la.popleft())
+    def push_lb(interpreter=None):
+        if interpreter.la:
+            interpreter.lb.appendleft(interpreter.la.popleft())
 
+    @staticmethod
     @BaseInterpreter.register("ra")
-    def rotate_la(self):
-        if self.la:
-            self.la.rotate(-1)
+    def rotate_la(interpreter=None):
+        if interpreter.la:
+            interpreter.la.rotate(-1)
 
+    @staticmethod
     @BaseInterpreter.register("rb")
-    def rotate_lb(self):
-        if self.lb:
-            self.lb.rotate(-1)
+    def rotate_lb(interpreter=None):
+        if interpreter.lb:
+            interpreter.lb.rotate(-1)
 
+    @staticmethod
     @BaseInterpreter.register("rr")
-    def rotate_both(self):
-        self.rotate_la()
-        self.rotate_lb()
+    def rotate_both(interpreter=None):
+        Interpreter.rotate_la(interpreter=interpreter)
+        Interpreter.rotate_lb(interpreter=interpreter)
 
+    @staticmethod
     @BaseInterpreter.register("rra")
-    def reverse_rotate_la(self):
-        if self.la:
-            self.la.rotate(1)
+    def reverse_rotate_la(interpreter=None):
+        if interpreter.la:
+            interpreter.la.rotate(1)
 
+    @staticmethod
     @BaseInterpreter.register("rrb")
-    def reverse_rotate_lb(self):
-        if self.lb:
-            self.lb.rotate(1)
+    def reverse_rotate_lb(interpreter=None):
+        if interpreter.lb:
+            interpreter.lb.rotate(1)
 
+    @staticmethod
     @BaseInterpreter.register("rrr")
-    def reverse_rotate_both(self):
-        self.reverse_rotate_la()
-        self.reverse_rotate_lb()
+    def reverse_rotate_both(interpreter=None):
+        Interpreter.reverse_rotate_la(interpreter=interpreter)
+        Interpreter.reverse_rotate_lb(interpreter=interpreter)
 
     def is_sorted(self):
         return list(self.la) == sorted(self.la) and not self.lb
@@ -115,5 +119,4 @@ if __name__ == "__main__":
     if len(sys.argv) != 3:
         print(f"Usage: {sys.argv[0]} numbers_file instructions_file")
         sys.exit(1)
-
     main(sys.argv[1], sys.argv[2])
