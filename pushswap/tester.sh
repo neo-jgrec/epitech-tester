@@ -32,6 +32,12 @@ if [ ! -d "files" ]; then
     exit 1
 fi
 
+# Check if the python checker is present
+if [ ! -f "solver.py" ]; then
+    echo "solver.py not found"
+    exit 1
+fi
+
 for file in files/*; do
     file_name="$(basename $file)"
 
