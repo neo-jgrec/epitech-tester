@@ -49,6 +49,7 @@ for file in files/*; do
 
     start_antman=$(date +%s+%N)
     timeout $TIMEOUT ./antman $file $antman_option > /tmp/antman_output || echo "$file_name: \033[0;31mTIMEOUT\033[0m" || continue
+    compression_ratio=$(echo "scale=3; $(wc -c < $file) / $(wc -c < /tmp/antman_output)" | bc)
     end_antman=$(date +%s+%N)
     start_giantman=$(date +%s+%N)
     timeout $TIMEOUT ./giantman /tmp/antman_output $antman_option > /tmp/giantman_output || echo "$file_name: \033[0;31mTIMEOUT\033[0m" || continue
@@ -66,7 +67,7 @@ for file in files/*; do
     fi
     diff /tmp/giantman_output $file > /dev/null
     if [ $? -eq 0 ]; then
-        echo -e "\033[0;32mOK\033[0m ($(echo $exec_time)s)"
+        echo -e "\033[0;32mOK\033[0m ($(echo $exec_time)s) - Compression ratio: $compression_ratio"
     elif [ $? -eq 1 ]; then
         echo -e "\033[0;31mKO\033[0m - "
         mkdir -p /tmp/antman_output_$file_name
