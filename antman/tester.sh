@@ -75,3 +75,6 @@ for file in files/*; do
         cp $file /tmp/antman_output_$file_name/file
     fi
 done
+
+rm -r /tmp/antman_output
+rm -r /tmp/giantman_output
