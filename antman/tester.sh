@@ -12,7 +12,7 @@ help() {
     echo "Usage: ./tester.sh"
     echo "-h --help: Display this help"
     echo
-    echo "You must have a bsq binary in the current directory and mouli_maps and mouli_maps_solved directories"
+    echo "You must have a antman and giantman binary in the current directory and mouli_maps and mouli_maps_solved directories"
 }
 
 # Check if help is asked
