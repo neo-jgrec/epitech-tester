@@ -1,0 +1,14 @@
+* text=lf
+* eol=lf
+
+*.png binary
+*.jpg binary
+
+# Ignore based on project files
+
+antman/files/* linguist-vendored
+
+bsq/mouli_maps/* linguist-vendored
+bsq/mouli_maps_solved/* linguist-vendored
+
+pushswap/files/* linguist-vendored
