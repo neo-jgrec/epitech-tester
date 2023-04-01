@@ -38,7 +38,7 @@ if [ ! -f "solver.py" ]; then
     exit 1
 fi
 
-echo -e "\e[33mDISCLAIMER:\e[0m This python script use to check if the instructions are valid may be slow. Be patient."
+echo -e "\e[33mDISCLAIMER:\e[0m The python script used to check if the instructions are valid may be slow. Be patient."
 
 for file in files/*; do
     file_name="$(basename $file)"
@@ -54,14 +54,16 @@ for file in files/*; do
     echo $numbers > /tmp/numbers
     instructions=$(cat /tmp/pushswap_output)
     echo $instructions > /tmp/instructions
+    # each instruction is separated by a space
+    instructions_nb=$(echo $instructions | wc -w)
 
     result=$(python3 solver.py /tmp/numbers /tmp/instructions)
     rm /tmp/numbers /tmp/instructions
 
     if [ "$result" = "1" ]; then
-        echo -e "$file_name: \e[32mOK\e[0m ($(echo $exec_time)s)"
+        echo -e "$file_name: \e[32mOK\e[0m ($(echo $exec_time)s, $instructions_nb instructions)"
     else
-        echo -e "$file_name: \e[31mKO\e[0m ($(echo $exec_time)s)"
+        echo -e "$file_name: \e[31mKO\e[0m ($(echo $exec_time)s, $instructions_nb instructions)"
     fi
 done
 
