@@ -1,4 +1,4 @@
-## push_swap tester
+## lem_in tester
 
 To test your push_swap project, you can use the following script :
 
