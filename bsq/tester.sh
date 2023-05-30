@@ -52,7 +52,7 @@ for map in mouli_maps/*; do
     fi
     diff /tmp/bsq_output $solved_map > /dev/null
     if [ $? -eq 0 ]; then
-        echo "\033[0;32mOK\033[0m ($(echo $exec_time)s)"
+        echo -e "\033[0;32mOK\033[0m ($(echo $exec_time)s)"
     else
         echo -e "\033[0;31mKO\033[0m - "
         mkdir -p /tmp/bsq_output_$map_name
