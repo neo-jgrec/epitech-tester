@@ -1,0 +1,105 @@
+#!/usr/bin/env python3
+
+import subprocess
+import random
+import os
+from multiprocessing import Pool
+import time
+import tempfile
+
+def generate_map_file(file_name, num_rooms, num_ants):
+    with open(file_name, 'w') as file:
+        file.write(f"{num_ants}\n")
+
+        for i in range(num_rooms):
+            x = random.randint(0, 100)
+            y = random.randint(0, 100)
+            if i == 0:
+                file.write("##start\n")
+            elif i == num_rooms - 1:
+                file.write("##end\n")
+            file.write(f"{i} {x} {y}\n")
+
+        for i in range(num_rooms - 1):
+            file.write(f"{i}-{i+1}\n")
+
+def test_lem_in(file_name):
+    num_ants = None
+
+    with open(file_name, 'r') as file:
+        for line in file:
+            if line.startswith("#"):
+                continue
+
+            try:
+                num_ants = int(line)
+                break
+            except ValueError:
+                continue
+
+    if num_ants is None:
+        raise ValueError(f"No valid number of ants found in file {file_name}")
+
+    start_time = time.time()
+
+    result = subprocess.run(['./lem_in'], stdin=open(file_name), text=True, capture_output=True)
+
+    end_time = time.time()
+    exec_time = end_time - start_time
+
+    if result.returncode != 0:
+        print(f"\033[91mKO\033[0m: lem_in returned non-zero exit code for {file_name}")
+        return False
+
+    lines = result.stdout.splitlines()
+
+    num_ants_output = None
+    for line in lines:
+        if line.startswith("#"):
+            continue
+        try:
+            num_ants_output = int(line)
+            break
+        except ValueError:
+            continue
+
+    if num_ants_output is None:
+        print(f"\033[91mKO\033[0m: No valid number of ants found in output for {file_name}")
+        return False
+
+    num_rooms = len([line for line in lines if not line.startswith("#") and not "-" in line]) - 1
+    num_moves = len([line for line in lines if line.startswith("P")])
+
+    if num_moves < num_ants or num_moves > num_ants * num_rooms:
+        print(f"\033[91mKO\033[0m: Number of moves ({num_moves}) is not between {num_ants} and {num_ants * num_rooms} for {file_name} in {exec_time:.3f}s")
+        with tempfile.NamedTemporaryFile(dir="/tmp", delete=False) as temp:
+            temp.write(result.stdout.encode())
+            print(f"Output saved in {temp.name}")
+        return False, exec_time
+
+    return True, exec_time
+
+
+def generate_and_test(i):
+    file_name = f"test_map_{i}"
+    num_rooms = random.randint(5, 20)
+    num_ants = random.randint(1, num_rooms)
+    generate_map_file(file_name, num_rooms, num_ants)
+    result, exec_time = test_lem_in(file_name)
+    os.remove(file_name)
+    return result, exec_time
+
+num_tests = 10
+
+if not os.path.isfile("./lem_in"):
+    print(f"\033[91mKO\033[0m: lem_in not found")
+    exit(1)
+
+with Pool(5) as p:
+    results = p.map(generate_and_test, range(num_tests))
+
+for i, (result, exec_time) in enumerate(results):
+    if result:
+        print(f"[\033[92mOK\033[0m][\033[33m{exec_time:.3f}s\033[0m] Test passed for test_map_{i}")
+    else:
+        print(f"[\033[91mKO\033[0m][\033[33m{exec_time:.3f}s\033[0m] Test failed for test_map_{i}")
