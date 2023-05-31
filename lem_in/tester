@@ -86,7 +86,6 @@ def generate_and_test(i):
     num_ants = random.randint(1, num_rooms)
     generate_map_file(file_name, num_rooms, num_ants)
     result, exec_time = test_lem_in(file_name)
-    os.remove(file_name)
     return result, exec_time
 
 num_tests = 10

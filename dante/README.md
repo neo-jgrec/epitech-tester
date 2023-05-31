@@ -1,6 +1,6 @@
 ## dante tester
 
-To test your push_swap project, you can use the following script :
+To test your dante project, you can use the following script :
 
 ```bash
 ./tester.sh

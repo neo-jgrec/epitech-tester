@@ -1,6 +1,6 @@
 ## lem_in tester
 
-To test your push_swap project, you can use the following script :
+To test your lem_in project, you can use the following script :
 
 ```bash
 ./tester.sh
