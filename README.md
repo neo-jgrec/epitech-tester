@@ -1,10 +1,14 @@
-## Epitech Testers
+# Epitech Testers
 
 This repository contains a set of scripts to test your projects.
 
-#### push_swap see : [push_swap](pushswap/README.md)
-#### bsq see : [bsq](bsq/README.md)
-#### antman see : [antman](antman/README.md)
-#### dante see : [dante](dante/README.md)
-#### my_ls see : [my_ls](my_ls/README.md)
-#### lem_in see : [lem_in](lem_in/README.md)
+### ```CPE``` *Elementary Programming in C*
+- #### [BSQ](bsq/README.md)
+- #### [Push Swap](pushswap/README.md)
+- #### [Antman](antman/README.md)
+- #### [Dante](dante/README.md)
+- #### [Lem-in](lem_in/README.md)
+- #### [Corewar](corewar/README.md)
+
+### ```PSU``` *Unix System Programming*
+- #### [My ls](my_ls/README.md)
